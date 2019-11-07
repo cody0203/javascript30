@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      property="og:image"
+      content="https://cody0203.github.io/javascript30/ajax-type-ahead-day-6/background.png"
+    />
+    <meta property="og:title" content="Type Ahead 👀" />
+  </head>
+  <body>
+    <form class="search-form">
+      <input type="text" class="search" placeholder="Tỉnh hoặc thành phố" />
+      <ul class="suggestions">
+        <li>Tìm kiếm theo thành phố</li>
+        <li>hoặc tỉnh</li>
+      </ul>
+    </form>
+    <script>
+      const endpoint =
+        "https://raw.githubusercontent.com/hienvd/vietnam-cities-list/master/cities.json";
+
+      const cities = [];
+
+      fetch(endpoint)
+        .then(blob => blob.json())
+        .then(data => cities.push(...data));
+
+      function findMatches(wordToMatch, cities) {
+        return cities.filter(place => {
+          const regex = new RegExp(wordToMatch, "gi");
+          return place.city.match(regex) || place.province.match(regex);
+        });
+      }
+
+      function numberWithCommas(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      function displayMatches() {
+        const matchArray = findMatches(this.value, cities);
+
+        const html = matchArray
+          .map(place => {
+            const regex = new RegExp(this.value, "gi");
+            const cityName = place.city.replace(
+              regex,
+              `<span class="hl">${this.value}</span>`
+            );
+
+            const provinceName = place.province.replace(
+              regex,
+              `<span class="hl">${this.value}</span>`
+            );
+            return `
+            <li>
+              <span class="name">${cityName}, ${provinceName}</span>
+              <span class="population">${numberWithCommas(
+                place.population
+              )}</span>
+            <li>
+          `;
+          })
+          .join("");
+
+        suggestions.innerHTML = html;
+      }
+
+      const input = document.querySelector(".search");
+      const suggestions = document.querySelector(".suggestions");
+
+      input.addEventListener("input", displayMatches);
+    </script>
+  </body>
+</html>
